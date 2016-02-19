@@ -1,0 +1,55 @@
+<?php
+
+/**
+ * Implements hook_menu()
+ */
+function homemade_instagram_menu() {
+  $items['homemade_instagram'] = array(
+    'page callback' => 'homemade_instagram_view',
+    'access arguments' => array('view content'),
+  );
+  return $items;
+}
+
+function homemade_instagram_view() {
+
+  $content = homemade_instagram_fetch();
+
+  return $content;
+}
+
+// @ToDo: Fetch with hook_cron() and put into database
+// Display from database
+
+function homemade_instagram_fetch() {
+
+  $token = '2959172753.1fb234f.bbf11c049dda4d6db8d95cc98be07273';
+
+  $tags = variable_get('homemade_instagram_tags', 'monkey');
+
+  $url = 'https://api.instagram.com/v1/tags/' . $tags . '/media/recent?access_token=' . $token;
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+
+  $json = curl_exec($ch);
+  curl_close($ch);
+
+  $content = array();
+
+  $results = json_decode($json);
+
+  foreach ($results->data as $data) {
+    $img = $data->images->low_resolution;
+    $content[] = array (
+      '#markup' => "<img src='{$img->url}' alt='{$data->caption->text}' title='{$data->caption->text}'>",
+      //'#theme' => 'image_style',
+      //'#path' => $img->url,
+      //'#style_name' => 'medium',
+      //'#alt' => $data->caption->text,
+      //'#title' => $data->caption->text,
+    );
+  }
+
+  return $content;
+}

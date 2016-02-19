@@ -1,0 +1,3 @@
+name = Homemade Instagram
+description = A test program to read tags from instagram API.
+core = 7.x
